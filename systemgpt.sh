@@ -1,28 +1,45 @@
 #!/bin/bash
-cd 
-location=$(pwd)
-OPENAI_API_KEY=$(cat /usr/local/bin/OPENAI_API_KEY) #assistant write api key needed
-ASSISTANT_ID="asst_FVld48ft1p9VTqmT8neMaYKZ"
-OS=$(grep '^NAME=' /etc/os-release | sed -e 's/NAME=//g' -e 's/"//g')
-API_KEY_FILE="/usr/local/bin/OPENAI_API_KEY"
+API_KEY_FILE="$HOME/.openai_api_key"
+API_ENDPOINT="https://api.openai.com/v1/models"
+ask_and_save_api_key() {
+    while true; do
+        echo "Please enter your OpenAI API Key:"
+        read -r user_api_key
+        if verify_api_key "$user_api_key"; then
+            echo "$user_api_key" > "$API_KEY_FILE"
+            echo "API Key is valid and has been saved to $API_KEY_FILE."
+            break
+        else
+            echo "The API Key is invalid or there was an error. Please try again."
+        fi
+    done
+}
 
-if [ ! -s "$API_KEY_FILE" ]; then
-    echo "The OpenAI API Key file is empty or does not exist."
-    read -p "Please enter your assistant write API key: " api_key
-    if [ -z "$api_key" ]; then
-        echo "No input provided. Exiting."
-        exit 1
+verify_api_key() {
+    local api_key=$1
+    local response=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $api_key" "$API_ENDPOINT")
+
+    if [ "$response" -eq 200 ]; then
+        echo "The API Key is valid."
+        return 0 # Success
     else
-        sudo echo "$api_key" | sudo tee "$API_KEY_FILE" > /dev/null
-        sudo chmod 600 "$API_KEY_FILE"
-        
-        echo "API Key has been saved to $API_KEY_FILE."
+        echo "The API Key is invalid or there was an error. Response code: $response"
+        return 1 # Failure
+    fi
+}
+
+if [ -f "$API_KEY_FILE" ] && [ -s "$API_KEY_FILE" ]; then
+    API_KEY=$(cat "$API_KEY_FILE")
+    if ! verify_api_key "$API_KEY"; then
+        echo "Existing API key is invalid. Please enter a new one."
+        ask_and_save_api_key
     fi
 else
-    echo "OpenAI API Key file already exists and is not empty."
+    ask_and_save_api_key
 fi
-
-cd $location
+OPENAI_API_KEY=$(cat $HOME/.openai_api_key)
+ASSISTANT_ID="asst_FVld48ft1p9VTqmT8neMaYKZ"
+OS=$(grep '^NAME=' /etc/os-release | sed -e 's/NAME=//g' -e 's/"//g')
 
 create_thread() {
   curl https://api.openai.com/v1/threads \
@@ -89,14 +106,6 @@ while true; do
   done
   display_response | jq -r '.data[0].content[0].text.value'
   executable=$(display_response | jq -r '.data[0].content[0].text.value')
-  clear
-  read -p "Do you want to execute: $executable (y/n):" choice 
-  if [ $choice == y ]
-  then
-    echo $executable >> executed.txt
-    bash -c "$executable"
-  elif [ $choice == n ]
-  then
-    echo "did not execute!"
-  fi
+  echo $executable >> executed.txt
+  bash -c "$executable"
 done
