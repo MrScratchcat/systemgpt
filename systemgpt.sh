@@ -107,5 +107,8 @@ while true; do
   display_response | jq -r '.data[0].content[0].text.value'
   executable=$(display_response | jq -r '.data[0].content[0].text.value')
   echo $executable >> executed.txt
-  bash -c "$executable"
+    read -p "Do you want to execute: $executable (y/n):" choice
+    if [ "$choice" == "y" ]; then
+        bash -c "$executable"
+    fi
 done
