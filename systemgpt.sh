@@ -1,4 +1,14 @@
 #!/bin/bash
+
+read -p "you agree that if you use systemgpt that there is an chance that your system can break and data can be lost (yes/no):" yn
+if [ "$yn" == "yes" ]; then
+    echo " "
+    echo "agreed" > .agree
+else
+    echo "you didn't agree exiting now." 
+    exit
+fi
+
 API_KEY_FILE="$HOME/.openai_api_key"
 API_ENDPOINT="https://api.openai.com/v1/models"
 ask_and_save_api_key() {
