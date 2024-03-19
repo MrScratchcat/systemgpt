@@ -5,3 +5,9 @@ To use systemgpt you will need to install jq
 ```bash
 sudo apt install jq
 ```
+```bash
+sudo dnf install jq
+```
+```bash
+sudo zypper install jq
+```
