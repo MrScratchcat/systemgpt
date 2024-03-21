@@ -1,5 +1,30 @@
 #!/bin/bash
 
+if command -v jq >/dev/null 2>&1; then
+    echo "jq is already installed."
+else
+    if command -v apt-get >/dev/null 2>&1; then
+        PM=apt-get
+        INSTALL_CMD="sudo $PM update && sudo $PM install -y jq"
+    elif command -v dnf >/dev/null 2>&1; then
+        PM=dnf
+        INSTALL_CMD="sudo $PM install -y jq"
+    elif command -v yum >/dev/null 2>&1; then
+        PM=yum
+        INSTALL_CMD="sudo $PM install -y jq"
+    elif command -v pacman >/dev/null 2>&1; then
+        PM=pacman
+        INSTALL_CMD="sudo $PM -Sy jq"
+    elif command -v zypper >/dev/null 2>&1; then
+        PM=zypper
+        INSTALL_CMD="sudo $PM install -y jq"
+    else
+        echo "Package manager not detected. You may need to install jq manually."
+        exit 1
+    fi
+fi
+eval $INSTALL_CMD
+clear
 read -p "you agree that if you use systemgpt that there is an chance that your system can break and data can be lost (yes/no):" yn
 if [ "$yn" == "yes" ]; then
     echo " "
