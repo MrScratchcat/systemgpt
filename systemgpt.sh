@@ -123,8 +123,7 @@ while true; do
   clear
   read -p "SystemGPT: What do you want me to do?: " prompt
   if [ "$prompt" == "exit" ]; then
-      exit
-      clear
+      clear && exit
   fi
   input="$prompt os=$OS desktop_environmen=$DESKTOP_SESSION"
   create_thread > /dev/null
