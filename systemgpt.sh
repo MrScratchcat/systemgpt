@@ -122,7 +122,7 @@ display_response() {
 while true; do
   clear
   read -p "SystemGPT: What do you want me to do?: " prompt
-  input="$prompt os=$OS"
+  input="$prompt os=$OS desktop_environmen=$DESKTOP_SESSION"
   create_thread > /dev/null
   THREAD_ID=$(create_thread | jq -r '.id')
   echo "created thread: $THREAD_ID"
