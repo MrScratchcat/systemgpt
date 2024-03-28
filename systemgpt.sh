@@ -122,7 +122,7 @@ display_response() {
 while true; do
   clear
   read -p "SystemGPT: What do you want me to do?: " prompt
-  if [ "promt" == "exit" ]; then
+  if [ "$promt" == "exit" ]; then
       exit
   fi
   input="$prompt os=$OS desktop_environmen=$DESKTOP_SESSION"
